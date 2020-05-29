@@ -1,32 +1,36 @@
 var hr_to_color = function (hr) {
-    var color = "black";
+    var color = "#333";
     if (hr < 114) {
-        color = "#3ff";
+        color = "#3cc";
     } else if (hr < 124) {
-        color = "#33f";
+        color = "#33c";
     } else if (hr < 143) {
-        color = "#3f3";
+        color = "#3c3";
     } else if (hr < 158) {
-        color = "#ff3";
+        color = "#dd3";
     } else if (hr < 171) {
-        color = "#f3f";
+        color = "#c3c";
     } else {
-        color = "#f33";
+        color = "#c33";
     }
 
     return color;
 };
 
-// var add_circle = function (pair) {
-//     L.circle(pair[0], { 
-//                 radius: 80,
-//                 stroke: false,
-//                 fillColor: hr_to_color(pair[1]),
-//                 fillOpacity: 0.2
-//             }).addTo(mymap);
-// };
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-var mymap = L.map('map').setView([27.73583, 111.350927], 13);
+var add_circle = function (pair) {
+    L.circle(pair[0], { 
+                radius: 80,
+                stroke: false,
+                fillColor: hr_to_color(pair[1]),
+                fillOpacity: 0.2
+            }).addTo(mymap);
+};
+
+var mymap = L.map('map').setView([27.73583, 111.350927], 14);
 L.tileLayer('https://tile.thunderforest.com/cycle/{z}/{x}/{y}.png\
 ?apikey=30ed08b6749b4fa2a0bbfe8a111078f4', {
     attribution: 'Maps © <a href="https://www.thunderforest.com">\
@@ -37,21 +41,15 @@ OpenStreetMap contributors</a>',
 
 fetch("gpx_hr.json")
 .then(response => response.json())
-.then(function (pairs) {
+.then(async function (pairs) {
     // add circle to the map
 
-    var add_circle = function (pairs, i) {
-        if (i === pairs.length) return;
+    for (var i = 0; i < pairs.length; i++) {
+        if (i % 50 == 0) {
+            mymap.setView(pairs[i][0], 14);
+        }
 
-        mymap.setView(pairs[i][0], 14);
-        L.circle(pairs[i][0], { 
-                    radius: 80,
-                    stroke: false,
-                    fillColor: hr_to_color(pairs[i][1]),
-                    fillOpacity: 0.8
-                }).addTo(mymap);
-        setTimeout(add_circle, 0, pairs, i+5);
-    };
-
-    add_circle(pairs, 0);
+        add_circle(pairs[i]);
+        await sleep(1);
+    }
 });
